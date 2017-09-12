@@ -22,12 +22,13 @@ class TestNSLocale : XCTestCase {
             ("test_Identifier", test_Identifier),
             ("test_copy", test_copy),
             ("test_availableIdentifiers", test_availableIdentifiers),
+            ("test_localeProperties", test_localeProperties),
         ]
     }
 
     func test_Identifier() {
         // Current locale identifier should not be empty
-        // Or things like NSNumberFormatter spellOut style won't work
+        // Or things like NumberFormatter spellOut style won't work
         XCTAssertFalse(Locale.current.identifier.isEmpty)
 
         let enUSID = "en_US"
@@ -112,4 +113,14 @@ class TestNSLocale : XCTestCase {
      func test_availableIdentifiers() {
         XCTAssertNoThrow(Locale.availableIdentifiers)
     }
+ 
+    func test_localeProperties(){
+        let enUSID = "en_US"
+        let locale = Locale(identifier: enUSID)
+        XCTAssertEqual(String(describing: locale.languageCode!), "en")
+        XCTAssertEqual(String(describing: locale.decimalSeparator!), ".")
+        XCTAssertEqual(String(describing: locale.currencyCode!), "USD")
+        XCTAssertEqual(String(describing: locale.collatorIdentifier!), enUSID)
+    }
+
 }

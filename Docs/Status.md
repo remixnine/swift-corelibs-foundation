@@ -98,7 +98,7 @@ There is no _Complete_ status for test coverage because there are always additio
     | `EnergyFormatter`               | Unimplemented   | None          |                                                                                           |
     | `ISO8601DateFormatter`        | Unimplemented   | None          |                                                                                           |
     | `LengthFormatter`               | Complete 	    | Substantial   |                                                                                           |
-    | `MassFormatter`                 | Unimplemented   | None          |                                                                                           |
+    | `MassFormatter`                 | Complete        | Substantial   | Needs localization                                                                        |
     | `NumberFormatter`               | Mostly Complete | Substantial   | `objectValue(_:range:)` remains unimplemented                                             |
     | `PersonNameComponentsFormatter` | Unimplemented   | None          |                                                                                           |
     | `ByteCountFormatter`            | Mostly Complete | Substantial   | `init?(coder:)` remains unimplemented                                                     |
@@ -278,7 +278,7 @@ There is no _Complete_ status for test coverage because there are always additio
     | `Process`        | Mostly Complete | Substantial   | `interrupt()`, `terminate()`, `suspend()`, and `resume()` remain unimplemented                                            |
     | `Bundle`         | Mostly Complete | Incomplete    | `allBundles`, `init(for:)`, `unload()`, `classNamed()`, and `principalClass` remain unimplemented                         |
     | `ProcessInfo`    | Complete        | Substantial   |                                                                                                                           |
-    | `Thread`         | Incomplete      | Incomplete    | `isMainThread`, `mainThread`, `name`, `callStackReturnAddresses`, and `callStackSymbols` remain unimplemented             |
+    | `Thread`         | Complete        | Incomplete    |                                                                                                                           |
     | `Operation`      | Complete        | Incomplete    |                                                                                                                           |
     | `BlockOperation` | Complete        | Incomplete    |                                                                                                                           |
     | `OperationQueue` | Complete        | Incomplete    |                                                                                                                           |

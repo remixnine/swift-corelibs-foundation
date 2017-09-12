@@ -27,6 +27,7 @@
 #include <CoreFoundation/ForFoundationOnly.h>
 #include <fts.h>
 #include <pthread.h>
+#include <execinfo.h>
 
 _CF_EXPORT_SCOPE_BEGIN
 
@@ -138,7 +139,7 @@ struct _NSMutableStringBridge {
 };
 
 struct _NSXMLParserBridge {
-    _CFXMLInterface _Nullable (*_Nonnull currentParser)();
+    _CFXMLInterface _Nullable (*_Nonnull currentParser)(void);
     _CFXMLInterfaceParserInput _Nullable (*_Nonnull _xmlExternalEntityWithURL)(_CFXMLInterface interface, const char *url, const char * identifier, _CFXMLInterfaceParserContext context, _CFXMLInterfaceExternalEntityLoader originalLoaderFunction);
     
     _CFXMLInterfaceParserContext _Nonnull (*_Nonnull getContext)(_CFXMLInterface ctx);
@@ -254,6 +255,8 @@ CF_PRIVATE void _CFSwiftRelease(void *_Nullable t);
 
 CF_EXPORT void _CFRuntimeBridgeTypeToClass(CFTypeID type, const void *isa);
 
+CF_EXPORT CFNumberType _CFNumberGetType2(CFNumberRef number);
+
 typedef	unsigned char __cf_uuid[16];
 typedef	char __cf_uuid_string[37];
 typedef __cf_uuid _cf_uuid_t;
@@ -292,13 +295,14 @@ CF_EXPORT char *_Nullable *_Nonnull _CFEnviron(void);
 CF_EXPORT void CFLog1(CFLogLevel lev, CFStringRef message);
 
 CF_EXPORT Boolean _CFIsMainThread(void);
+CF_EXPORT pthread_t _CFMainPThread;
 
 CF_EXPORT CFHashCode __CFHashDouble(double d);
 
 typedef pthread_key_t _CFThreadSpecificKey;
 CF_EXPORT CFTypeRef _Nullable _CFThreadSpecificGet(_CFThreadSpecificKey key);
-CF_EXPORT void _CThreadSpecificSet(_CFThreadSpecificKey key, CFTypeRef _Nullable value);
-CF_EXPORT _CFThreadSpecificKey _CFThreadSpecificKeyCreate();
+CF_EXPORT void _CFThreadSpecificSet(_CFThreadSpecificKey key, CFTypeRef _Nullable value);
+CF_EXPORT _CFThreadSpecificKey _CFThreadSpecificKeyCreate(void);
 
 typedef pthread_attr_t _CFThreadAttributes;
 typedef pthread_t _CFThreadRef;

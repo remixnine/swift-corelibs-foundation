@@ -49,7 +49,10 @@ class TestFileManager : XCTestCase {
         } catch _ {
             XCTFail()
         }
-        
+
+        // Ensure attempting to create the directory again fails gracefully.
+        XCTAssertNil(try? fm.createDirectory(atPath: path, withIntermediateDirectories:false, attributes:nil))
+
         var isDir = false
         let exists = fm.fileExists(atPath: path, isDirectory: &isDir)
         XCTAssertTrue(exists)
@@ -76,6 +79,29 @@ class TestFileManager : XCTestCase {
         XCTAssertTrue(exists)
         XCTAssertFalse(isDir)
         
+        do {
+            try fm.removeItem(atPath: path)
+        } catch {
+            XCTFail("Failed to clean up file")
+        }
+
+        let permissions = NSNumber(value: Int16(0o753))
+        let attributes = [FileAttributeKey.posixPermissions: permissions]
+        XCTAssertTrue(fm.createFile(atPath: path, contents: Data(),
+                                    attributes: attributes))
+        guard let retrievedAtributes = try? fm.attributesOfItem(atPath: path) else {
+            XCTFail("Failed to retrieve file attributes from created file")
+            return
+        }
+
+        XCTAssertTrue(retrievedAtributes.contains(where: { (attribute) -> Bool in
+            guard let attributeValue = attribute.value as? NSNumber else {
+                return false
+            }
+            return (attribute.key == .posixPermissions)
+                && (attributeValue == permissions)
+        }))
+
         do {
             try fm.removeItem(atPath: path)
         } catch {

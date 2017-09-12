@@ -80,10 +80,14 @@ internal func _CFZeroUnsafeIvars<T>(_ arg: inout T) {
     }
 }
 
-internal func __CFSwiftGetBaseClass() -> AnyObject.Type {
-    return __NSCFType.self
+@_versioned
+@_cdecl("__CFSwiftGetBaseClass")
+internal func __CFSwiftGetBaseClass() -> UnsafeRawPointer {
+    return unsafeBitCast(__NSCFType.self, to:UnsafeRawPointer.self)
 }
 
+@_versioned
+@_cdecl("__CFInitializeSwift")
 internal func __CFInitializeSwift() {
     
     _CFRuntimeBridgeTypeToClass(CFStringGetTypeID(), unsafeBitCast(_NSCFString.self, to: UnsafeRawPointer.self))

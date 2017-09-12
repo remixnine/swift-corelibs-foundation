@@ -683,10 +683,10 @@ open class NSKeyedUnarchiver : NSCoder {
     }
     
     open override func decodeBool(forKey key: String) -> Bool {
-        guard let result : NSNumber = _decodeValue(forKey: key) else {
+        guard let result : Bool = _decodeValue(forKey: key) else {
             return false
         }
-        return result.boolValue
+        return result
     }
     
     open override func decodeInt32(forKey key: String) -> Int32 {
@@ -813,7 +813,7 @@ open class NSKeyedUnarchiver : NSCoder {
             scanner.scanLocation = 1
             
             var count : Int = 0
-            guard scanner.scanInteger(&count) && count > 0 else {
+            guard scanner.scanInt(&count) && count > 0 else {
                 fatalError("NSKeyedUnarchiver.decodeValueOfObjCType: array count is missing or zero")
             }
             

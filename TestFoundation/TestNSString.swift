@@ -68,6 +68,8 @@ class TestNSString : XCTestCase {
             ("test_FromContentsOfURL",test_FromContentsOfURL),
             ("test_FromContentsOfURLUsedEncodingUTF16BE", test_FromContentsOfURLUsedEncodingUTF16BE),
             ("test_FromContentsOfURLUsedEncodingUTF16LE", test_FromContentsOfURLUsedEncodingUTF16LE),
+            ("test_FromContentsOfURLUsedEncodingUTF32BE", test_FromContentsOfURLUsedEncodingUTF32BE),
+            ("test_FromContentsOfURLUsedEncodingUTF32LE", test_FromContentsOfURLUsedEncodingUTF32LE),
             ("test_FromContentOfFile",test_FromContentOfFile),
             ("test_swiftStringUTF16", test_swiftStringUTF16),
             // This test takes forever on build servers; it has been seen up to 1852.084 seconds
@@ -94,7 +96,6 @@ class TestNSString : XCTestCase {
             ("test_mutableStringConstructor", test_mutableStringConstructor),
             ("test_emptyStringPrefixAndSuffix",test_emptyStringPrefixAndSuffix),
             ("test_PrefixSuffix", test_PrefixSuffix),
-            ("test_utf16StringRangeCount", test_StringUTF16ViewIndexStrideableRange),
             ("test_reflection", { _ in test_reflection }),
             ("test_replacingOccurrences", test_replacingOccurrences),
             ("test_getLineStart", test_getLineStart),
@@ -329,6 +330,38 @@ class TestNSString : XCTestCase {
           let string = try NSString(contentsOf: testFileURL, usedEncoding: &encoding)
           XCTAssertEqual(string, "NSString fromURL usedEncoding test with UTF16 LE file", "Wrong result when reading UTF16LE file")
           XCTAssertEqual(encoding, String.Encoding.utf16LittleEndian.rawValue, "Wrong encoding detected from UTF16LE file")
+      } catch {
+          XCTFail("Unable to init NSString from contentOf:usedEncoding:")
+      }
+    }
+
+    func test_FromContentsOfURLUsedEncodingUTF32BE() {
+      guard let testFileURL = testBundle().url(forResource: "NSString-UTF32-BE-data", withExtension: "txt") else {
+        XCTFail("URL for NSString-UTF32-BE-data.txt is nil")
+        return
+      }
+
+      do {
+         var encoding: UInt = 0
+         let string = try NSString(contentsOf: testFileURL, usedEncoding: &encoding)
+         XCTAssertEqual(string, "NSString fromURL usedEncoding test with UTF32 BE file", "Wrong result when reading UTF32BE file")
+         XCTAssertEqual(encoding, String.Encoding.utf32BigEndian.rawValue, "Wrong encoding detected from UTF32BE file")
+      } catch {
+          XCTFail("Unable to init NSString from contentOf:usedEncoding:")
+      }
+    }
+
+    func test_FromContentsOfURLUsedEncodingUTF32LE() {
+      guard let testFileURL = testBundle().url(forResource: "NSString-UTF32-LE-data", withExtension: "txt") else {
+        XCTFail("URL for NSString-UTF32-LE-data.txt is nil")
+        return
+      }
+
+      do {
+         var encoding: UInt = 0
+         let string = try NSString(contentsOf: testFileURL, usedEncoding: &encoding)
+         XCTAssertEqual(string, "NSString fromURL usedEncoding test with UTF32 LE file", "Wrong result when reading UTF32LE file")
+         XCTAssertEqual(encoding, String.Encoding.utf32LittleEndian.rawValue, "Wrong encoding detected from UTF32LE file")
       } catch {
           XCTFail("Unable to init NSString from contentOf:usedEncoding:")
       }
@@ -1036,34 +1069,6 @@ class TestNSString : XCTestCase {
         }
     }
     
-    //[SR-1988] Ranges of String.UTF16View.Index have negative count
-    func test_StringUTF16ViewIndexStrideableRange(){
-        let testStrings = ["", "\u{0000}", "a", "aa", "ab", "\u{007f}", "\u{0430}", "\u{0430}\u{0431}\u{0432}","\u{1f425}"]
-        
-        func checkStrideable<S : Strideable>(
-            instances: [S],
-            distances: [S.Stride],
-            distanceOracle: (Int, Int) -> S.Stride
-            ) {
-            for i in instances.indices {
-                let first = instances[i]
-                for j in instances.indices {
-                    let second = instances[j]
-                    XCTAssertTrue(distanceOracle(i, j) == first.distance(to: second))
-                    XCTAssertTrue(second == first.advanced(by: distanceOracle(i, j)))
-                }
-            }
-        }
-        testStrings.forEach{
-            let utf16 = $0.utf16
-            var indicies = Array(utf16.indices)
-            indicies.append(utf16.indices.endIndex)
-            checkStrideable(instances: indicies,
-                            distances: Array(0..<utf16.count),
-                       distanceOracle: {$1 - $0})
-        }
-    }
-    
     func test_mutableStringConstructor() {
         let mutableString = NSMutableString(string: "Test")
         XCTAssertEqual(mutableString, "Test")
@@ -1134,6 +1139,10 @@ class TestNSString : XCTestCase {
 
         let s5 = NSString(string: "\r\ncats😺")
         XCTAssertEqual(s5.substring(with: NSMakeRange(1,6)), "\ncats�")
+
+        // SR-3363
+        let s6 = NSString(string: "Beyonce\u{301} and Tay")
+        XCTAssertEqual(s6.substring(with: NSMakeRange(7, 9)), "\u{301} and Tay")
     }
 }
 
@@ -1289,11 +1298,11 @@ func checkHasPrefixHasSuffix(_ lhs: String, _ rhs: String, _ stack: [UInt]) -> I
     // To determine the expected results, compare grapheme clusters,
     // scalar-to-scalar, of the NFD form of the strings.
     let lhsNFDGraphemeClusters =
-        lhs.decomposedStringWithCanonicalMapping.characters.map {
+        lhs.decomposedStringWithCanonicalMapping.map {
             Array(String($0).unicodeScalars)
     }
     let rhsNFDGraphemeClusters =
-        rhs.decomposedStringWithCanonicalMapping.characters.map {
+        rhs.decomposedStringWithCanonicalMapping.map {
             Array(String($0).unicodeScalars)
     }
     let expectHasPrefix = lhsNFDGraphemeClusters.starts(
